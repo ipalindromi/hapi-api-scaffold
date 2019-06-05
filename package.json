@@ -1,7 +1,11 @@
 {
-  "devDependencies": {
-    "@hapi/hapi": "^18.3.1",
-    "@hapi/vision": "^5.5.2",
-    "jest": "^24.8.0"
-  }
+	"scripts": {
+		"start": "./node_modules/nodemon/bin/nodemon.js src/index.js -i data/"
+	},
+	"devDependencies": {
+		"@hapi/hapi": "^18.3.1",
+		"@hapi/vision": "^5.5.2",
+		"jest": "^24.8.0",
+		"nodemon": "^1.19.1"
+	}
 }
