@@ -1,6 +1,7 @@
-'use strict';
+('use strict');
 
 const Hapi = require('@hapi/hapi');
+const { FEATURES } = require('./consts');
 
 /**
  * Initializes the web server.
@@ -15,16 +16,10 @@ const Hapi = require('@hapi/hapi');
  *
  * @param {bool} withViews - If true, will set up view rendering
  */
-const init = async (withViews = false) => {
-	const server = Hapi.server({
-		port: 3000,
-		host: 'localhost',
-		routes: {
-			cors: {
-				origin: ['*'],
-			},
-		},
-	});
+const init = async ({ features, serverConfig }) => {
+	const enabledFeatures = features;
+
+	const server = Hapi.server(serverConfig);
 
 	// TODO: Set up function to include all routes and test
 	const routes = { ...require('./routes') };
@@ -33,15 +28,16 @@ const init = async (withViews = false) => {
 	server.route(routes.users.post);
 
 	// OPTIONAL FEATURES
-	if (withViews === true) _registerViewLayer(server, withViews);
+	if (features && features.includes(FEATURES.FEATURES_WITH_VIEW) === true)
+		console.info('View template system enabled by feature flag');
+	await _registerViewLayer(server);
 
-	await server.start();
-	return server.info;
+	return server;
 };
 
 // TODO: Test, if logic/config is added. Otherwise, testing is handled
 // by checking whether we can or cannot render a template.
-async function _registerViewLayer(server, options) {
+async function _registerViewLayer(server, options = false) {
 	await server.register(require('@hapi/vision'));
 	const defaultOptions = {
 		engines: {
@@ -51,8 +47,10 @@ async function _registerViewLayer(server, options) {
 		path: 'templates',
 		helpersPath: 'modules',
 	};
-	const options = options ? Object.assign(defaultOptions, options) : defaultOptions;
-	server.views(options);
+	const view_options = options
+		? Object.assign(defaultOptions, options)
+		: defaultOptions;
+	server.views(view_options);
 }
 
 exports.init = init;
