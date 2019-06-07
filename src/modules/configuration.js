@@ -25,10 +25,17 @@ exports.readConfig = async function readConfig(
 	configPath = DEFAULT_CONFIG_PATH,
 	options = {},
 ) {
-	conf = require(configPath);
+	try {
+		conf = require(configPath);
 
-	if (typeof conf === 'function') conf = await conf(options);
-	if (typeof conf !== 'object') throw new Error('Non-object returned as config');
+		if (typeof conf === 'function') conf = await conf(options);
+		if (typeof conf !== 'object') throw new Error('Non-object returned as config');
+	} catch (e) {
+		if (!e.code === 'MODULE_NOT_FOUND')
+			console.warn('Error when loading config: ', e);
+		else console.info('No config file found.');
+		conf = {};
+	}
 
 	const config = Object.assign(makeDefaultConfig(options), conf);
 	return config;
